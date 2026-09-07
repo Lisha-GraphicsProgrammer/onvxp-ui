@@ -1,6 +1,6 @@
 // Shared design tokens and config used across ONVXP pages.
 
-export const DRAWER_OPEN = 220;
+export const DRAWER_OPEN = 248;
 export const DRAWER_CLOSED = 56;
 
 // ── Teal-green + white brand palette — final direction, confirmed. ──
