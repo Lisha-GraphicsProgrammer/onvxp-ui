@@ -307,7 +307,7 @@ export default function AlertDetail() {
 
           {/* Back — same pattern as Self-Learning's detail view: a plain
           link at the top of the content, not a separate structural row. */}
-          <Box onClick={() => navigate(-1)} sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.7, mb: 3, cursor: 'pointer', color: t.textMuted, '&:hover': { color: t.text } }}>
+          <Box onClick={() => navigate('/dashboard?page=Alerts')} sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.7, mb: 3, cursor: 'pointer', color: t.textMuted, '&:hover': { color: t.text } }}>
             <ArrowBackIcon sx={{ fontSize: 15 }} />
             <Typography sx={{ fontSize: '.82rem', fontWeight: 600 }}>All Alerts</Typography>
           </Box>

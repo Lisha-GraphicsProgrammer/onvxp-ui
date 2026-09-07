@@ -411,6 +411,7 @@ const DETAIL_MAX_WIDTH = 760;
 
 function DetailView({ jobId, onBack }: { jobId: number; onBack: () => void }) {
   const { t } = useTheme();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [actionState, setActionState] = useState<"idle" | "working" | "done">("idle");
 
@@ -440,6 +441,24 @@ function DetailView({ jobId, onBack }: { jobId: number; onBack: () => void }) {
     await queryClient.invalidateQueries({ queryKey: ["training-job", jobId] });
     await queryClient.invalidateQueries({ queryKey: ["training-jobs"] });
     setActionState("done");
+
+    // Redirect to Rules page and show a success toast there — reuses
+    // Rules.tsx's existing PENDING_TRAINING_KEY poll, which runs a check
+    // immediately on mount (not just its 10s interval), so the toast
+    // appears right away. This key name must exactly match Rules.tsx's
+    // PENDING_TRAINING_KEY constant ("omnix_pending_training_job").
+    try {
+      localStorage.setItem(
+        "omnix_pending_training_job",
+        JSON.stringify({
+          jobId: job.id,
+          instruction: humanizeClassName(job.class_name),
+          startedAt: Date.now(),
+        }),
+      );
+    } catch {}
+
+    navigate("/rules");
   };
 
   const handleReject = async () => {
