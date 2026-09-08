@@ -275,16 +275,25 @@ export default function CamerasPage() {
                       </Box>
                     )}
                   </Box>
-                  <Box sx={{ p: "14px 16px" }}>
+                  <Box sx={{ p: "14px 16px 16px" }}>
                     <Typography sx={{ color: t.text, fontSize: ".85rem", fontWeight: 600 }} noWrap>
                       {cam.name}
                     </Typography>
-                    <Typography sx={{ color: t.textMuted, fontSize: ".74rem", mt: "2px" }}>
+                    <Typography sx={{ color: t.textMuted, fontSize: ".74rem", mt: "2px" }} noWrap>
                       {cam.zone_name || "No zone"} · {cam.resolution}
                       {cam.fps ? ` · ${cam.fps}fps` : ""}
                     </Typography>
                     {cam.id === 1 && lastDetection && (
-                      <Typography sx={{ color: t.textMuted, fontSize: ".7rem", mt: "6px" }}>
+                      <Typography
+                        sx={{
+                          color: t.textMuted,
+                          fontSize: ".7rem",
+                          mt: "6px",
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                        }}
+                      >
                         Last detection {new Date(lastDetection).toLocaleTimeString()}
                       </Typography>
                     )}
