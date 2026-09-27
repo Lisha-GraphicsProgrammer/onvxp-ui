@@ -13,8 +13,14 @@ import PageHeader from "../../components/layout/PageHeader";
 import { FilterDropdown } from "../../components/common/Dropdown";
 import { useTheme } from "../../context/ThemeContext";
 import {
-  useCameras, useLatestIncident, useZones, useCreateCamera, useCreateZone,
-  useUploadVideo, useUpdateCamera, useDeleteCamera,
+  useCameras,
+  useLatestIncident,
+  useZones,
+  useCreateCamera,
+  useCreateZone,
+  useUploadVideo,
+  useUpdateCamera,
+  useDeleteCamera,
 } from "../../hooks/queries";
 import { ACCENT, GREEN } from "../../lib/constants";
 import type { ApiCamera } from "../../types";
@@ -35,10 +41,20 @@ type SourceType = "rtsp" | "http" | "file" | "phone";
 // setting up a phone don't know the URL shape, so this pre-fills the
 // port/path convention used by the most common apps (e.g. "IP Webcam" on
 // Android) instead of asking someone to type a raw URL.
-function buildSourceString(type: SourceType, fields: {
-  host: string; port: string; username: string; password: string; path: string;
-  httpUrl: string; fileName: string; phonePort: string; phonePath: string;
-}): string {
+function buildSourceString(
+  type: SourceType,
+  fields: {
+    host: string;
+    port: string;
+    username: string;
+    password: string;
+    path: string;
+    httpUrl: string;
+    fileName: string;
+    phonePort: string;
+    phonePath: string;
+  },
+): string {
   if (type === "file") return fields.fileName.trim();
   if (type === "http") return fields.httpUrl.trim();
   if (type === "phone") {
@@ -47,7 +63,9 @@ function buildSourceString(type: SourceType, fields: {
     if (!path.startsWith("/")) path = `/${path}`;
     return `http://${fields.host.trim()}:${port}${path}`;
   }
-  const auth = fields.username.trim() ? `${fields.username.trim()}:${fields.password}@` : "";
+  const auth = fields.username.trim()
+    ? `${fields.username.trim()}:${fields.password}@`
+    : "";
   const port = fields.port.trim() || "554";
   let path = fields.path.trim();
   if (path && !path.startsWith("/")) path = `/${path}`;
@@ -81,7 +99,8 @@ function parseSourceForEdit(source: string): Partial<typeof DEFAULT_FORM> {
     }
 
     const slashIndex = afterAuth.indexOf("/");
-    const hostPort = slashIndex !== -1 ? afterAuth.slice(0, slashIndex) : afterAuth;
+    const hostPort =
+      slashIndex !== -1 ? afterAuth.slice(0, slashIndex) : afterAuth;
     const path = slashIndex !== -1 ? afterAuth.slice(slashIndex) : "";
 
     const colonIndex2 = hostPort.lastIndexOf(":");
@@ -108,11 +127,18 @@ type CameraWithZone = ApiCamera & {
 };
 
 const DEFAULT_FORM = {
-  name: "", zoneId: "" as number | "",
+  name: "",
+  zoneId: "" as number | "",
   sourceType: "rtsp" as SourceType,
-  host: "", port: "554", username: "", password: "", path: "",
-  httpUrl: "", fileName: "",
-  phonePort: "8080", phonePath: "/video",
+  host: "",
+  port: "554",
+  username: "",
+  password: "",
+  path: "",
+  httpUrl: "",
+  fileName: "",
+  phonePort: "8080",
+  phonePath: "/video",
 };
 
 // Native <input>/<select> elements, hand-styled to match this file's own
@@ -121,29 +147,60 @@ const DEFAULT_FORM = {
 // completely separate system from this app's ThemeContext and renders
 // visibly broken sitting inside a custom-styled dark modal.
 function LabeledInput({
-  label, value, onChange, placeholder, type = "text", sx, required,
+  label,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+  sx,
+  required,
 }: {
-  label: string; value: string; onChange: (v: string) => void;
-  placeholder?: string; type?: string; sx?: object; required?: boolean;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder?: string;
+  type?: string;
+  sx?: object;
+  required?: boolean;
 }) {
   const { t } = useTheme();
   return (
     <Box sx={{ flex: 1, minWidth: 0, ...sx }}>
-      <Typography sx={{ color: t.textMuted, fontSize: ".72rem", fontWeight: 600, mb: 0.6 }}>
+      <Typography
+        sx={{
+          color: t.textMuted,
+          fontSize: ".72rem",
+          fontWeight: 600,
+          mb: 0.6,
+        }}
+      >
         {label.toUpperCase()}
-        {required && <Box component="span" sx={{ color: "#E74C3C" }}> *</Box>}
+        {required && (
+          <Box component="span" sx={{ color: "#E74C3C" }}>
+            {" "}
+            *
+          </Box>
+        )}
       </Typography>
       <Box
         component="input"
         type={type}
         value={value}
-        onChange={(e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
+        onChange={(e: ChangeEvent<HTMLInputElement>) =>
+          onChange(e.target.value)
+        }
         placeholder={placeholder}
         sx={{
-          width: "100%", boxSizing: "border-box",
-          padding: "9px 12px", borderRadius: "8px",
-          border: `1px solid ${t.border}`, background: t.bg, color: t.text,
-          fontSize: ".85rem", fontFamily: "inherit", outline: "none",
+          width: "100%",
+          boxSizing: "border-box",
+          padding: "9px 12px",
+          borderRadius: "8px",
+          border: `1px solid ${t.border}`,
+          background: t.bg,
+          color: t.text,
+          fontSize: ".85rem",
+          fontFamily: "inherit",
+          outline: "none",
           "&:focus": { borderColor: ACCENT },
           "&::placeholder": { color: t.textMuted },
         }}
@@ -153,9 +210,14 @@ function LabeledInput({
 }
 
 function ZoneSelect({
-  value, onChange, zones, onCreateZone, creating,
+  value,
+  onChange,
+  zones,
+  onCreateZone,
+  creating,
 }: {
-  value: number | ""; onChange: (v: number | "") => void;
+  value: number | "";
+  onChange: (v: number | "") => void;
   zones: { id: number; name: string }[];
   onCreateZone: (name: string) => void;
   creating: boolean;
@@ -174,16 +236,28 @@ function ZoneSelect({
 
   return (
     <Box>
-      <Typography sx={{ color: t.textMuted, fontSize: ".72rem", fontWeight: 600, mb: 0.6 }}>
+      <Typography
+        sx={{
+          color: t.textMuted,
+          fontSize: ".72rem",
+          fontWeight: 600,
+          mb: 0.6,
+        }}
+      >
         ZONE
-        <Box component="span" sx={{ color: "#E74C3C" }}> *</Box>
+        <Box component="span" sx={{ color: "#E74C3C" }}>
+          {" "}
+          *
+        </Box>
       </Typography>
       <Box sx={{ display: "flex", gap: 1 }}>
         <FilterDropdown
           value={value === "" ? "" : String(value)}
           onChange={(v) => onChange(v === "" ? "" : Number(v))}
           options={zones.map((z) => ({ value: String(z.id), label: z.name }))}
-          placeholder={zones.length ? "Select a zone…" : "No zones yet — create one"}
+          placeholder={
+            zones.length ? "Select a zone…" : "No zones yet — create one"
+          }
           flex={1}
           minWidth={0}
         />
@@ -191,8 +265,13 @@ function ZoneSelect({
           onClick={() => setShowNewZone((s) => !s)}
           title={showNewZone ? "Cancel" : "Create a new zone"}
           sx={{
-            width: 38, height: 38, flexShrink: 0, borderRadius: "8px",
-            display: "flex", alignItems: "center", justifyContent: "center",
+            width: 38,
+            height: 38,
+            flexShrink: 0,
+            borderRadius: "8px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
             cursor: "pointer",
             color: showNewZone ? "#E74C3C" : t.textMuted,
             border: `1px solid ${showNewZone ? "#E74C3C" : t.border}`,
@@ -203,7 +282,11 @@ function ZoneSelect({
             },
           }}
         >
-          {showNewZone ? <CloseIcon sx={{ fontSize: 18 }} /> : <AddIcon sx={{ fontSize: 18 }} />}
+          {showNewZone ? (
+            <CloseIcon sx={{ fontSize: 18 }} />
+          ) : (
+            <AddIcon sx={{ fontSize: 18 }} />
+          )}
         </Box>
       </Box>
 
@@ -213,24 +296,42 @@ function ZoneSelect({
             component="input"
             autoFocus
             value={newZoneName}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => setNewZoneName(e.target.value)}
-            onKeyDown={(e: KeyboardEvent) => { if (e.key === "Enter") submitNewZone(); }}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setNewZoneName(e.target.value)
+            }
+            onKeyDown={(e: KeyboardEvent) => {
+              if (e.key === "Enter") submitNewZone();
+            }}
             placeholder="New zone name"
             sx={{
-              flex: 1, minWidth: 0, boxSizing: "border-box",
-              padding: "8px 12px", borderRadius: "8px",
-              border: `1px solid ${t.border}`, background: t.bg, color: t.text,
-              fontSize: ".82rem", fontFamily: "inherit", outline: "none",
+              flex: 1,
+              minWidth: 0,
+              boxSizing: "border-box",
+              padding: "8px 12px",
+              borderRadius: "8px",
+              border: `1px solid ${t.border}`,
+              background: t.bg,
+              color: t.text,
+              fontSize: ".82rem",
+              fontFamily: "inherit",
+              outline: "none",
               "&:focus": { borderColor: ACCENT },
             }}
           />
           <Box
             onClick={submitNewZone}
             sx={{
-              px: 1.6, borderRadius: "8px", display: "flex", alignItems: "center",
-              fontSize: ".8rem", fontWeight: 600, whiteSpace: "nowrap",
-              cursor: creating || !newZoneName.trim() ? "not-allowed" : "pointer",
-              background: ACCENT, color: "#fff",
+              px: 1.6,
+              borderRadius: "8px",
+              display: "flex",
+              alignItems: "center",
+              fontSize: ".8rem",
+              fontWeight: 600,
+              whiteSpace: "nowrap",
+              cursor:
+                creating || !newZoneName.trim() ? "not-allowed" : "pointer",
+              background: ACCENT,
+              color: "#fff",
               opacity: creating || !newZoneName.trim() ? 0.6 : 1,
             }}
           >
@@ -271,7 +372,8 @@ export default function CamerasPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     uploadVideoMutation.mutate(file, {
-      onSuccess: (uploaded) => setForm((f) => ({ ...f, fileName: uploaded.filename })),
+      onSuccess: (uploaded) =>
+        setForm((f) => ({ ...f, fileName: uploaded.filename })),
     });
     // allows picking the exact same file again later without the browser
     // silently ignoring it because the input's value didn't change
@@ -320,23 +422,43 @@ export default function CamerasPage() {
     }
   };
 
-  const activeMutation = editingCameraId ? updateCameraMutation : createCameraMutation;
+  const activeMutation = editingCameraId
+    ? updateCameraMutation
+    : createCameraMutation;
 
   const canSubmit =
     form.name.trim().length > 0 &&
     form.zoneId !== "" &&
-    (form.sourceType === "rtsp" ? form.host.trim().length > 0 :
-     form.sourceType === "phone" ? form.host.trim().length > 0 :
-     form.sourceType === "http" ? form.httpUrl.trim().length > 0 :
-     form.fileName.trim().length > 0);
+    (form.sourceType === "rtsp"
+      ? form.host.trim().length > 0
+      : form.sourceType === "phone"
+        ? form.host.trim().length > 0
+        : form.sourceType === "http"
+          ? form.httpUrl.trim().length > 0
+          : form.fileName.trim().length > 0);
 
   const onlineCount = cameras.filter((c) => c.status === "online").length;
   const offlineCount = cameras.filter((c) => c.status === "offline").length;
 
   const statCards = [
-    { val: String(cameras.length), label: "Total cameras", color: t.textMuted, icon: <VideocamIcon sx={{ fontSize: 19 }} /> },
-    { val: String(onlineCount), label: "Online", color: GREEN, icon: <CheckCircleIcon sx={{ fontSize: 19 }} /> },
-    { val: String(offlineCount), label: "Offline", color: "#E74C3C", icon: <VideocamOffIcon sx={{ fontSize: 19 }} /> },
+    {
+      val: String(cameras.length),
+      label: "Total cameras",
+      color: t.textMuted,
+      icon: <VideocamIcon sx={{ fontSize: 19 }} />,
+    },
+    {
+      val: String(onlineCount),
+      label: "Online",
+      color: GREEN,
+      icon: <CheckCircleIcon sx={{ fontSize: 19 }} />,
+    },
+    {
+      val: String(offlineCount),
+      label: "Offline",
+      color: "#E74C3C",
+      icon: <VideocamOffIcon sx={{ fontSize: 19 }} />,
+    },
   ];
 
   return (
@@ -355,10 +477,17 @@ export default function CamerasPage() {
           <Box
             onClick={() => setAddOpen(true)}
             sx={{
-              display: "flex", alignItems: "center", gap: 0.8,
-              px: 2, py: 1, borderRadius: "10px",
-              background: ACCENT, color: "#fff",
-              fontSize: ".82rem", fontWeight: 600, cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 0.8,
+              px: 2,
+              py: 1,
+              borderRadius: "10px",
+              background: ACCENT,
+              color: "#fff",
+              fontSize: ".82rem",
+              fontWeight: 600,
+              cursor: "pointer",
               "&:hover": { opacity: 0.9 },
             }}
           >
@@ -369,7 +498,14 @@ export default function CamerasPage() {
 
         {/* Stat cards — plain, no decorative glow, matches the picker
         card treatment used elsewhere: hairline border, subtle shadow. */}
-        <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 2, mb: 4 }}>
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: 2,
+            mb: 4,
+          }}
+        >
           {statCards.map((s, i) => (
             <Box
               key={i}
@@ -399,10 +535,21 @@ export default function CamerasPage() {
                 {s.icon}
               </Box>
               <Box>
-                <Typography sx={{ fontSize: "1.3rem", fontWeight: 700, color: t.text, lineHeight: 1.1 }}>
+                <Typography
+                  sx={{
+                    fontSize: "1.3rem",
+                    fontWeight: 700,
+                    color: t.text,
+                    lineHeight: 1.1,
+                  }}
+                >
                   {s.val}
                 </Typography>
-                <Typography sx={{ color: t.textMuted, fontSize: ".78rem", mt: "2px" }}>{s.label}</Typography>
+                <Typography
+                  sx={{ color: t.textMuted, fontSize: ".78rem", mt: "2px" }}
+                >
+                  {s.label}
+                </Typography>
               </Box>
             </Box>
           ))}
@@ -411,7 +558,9 @@ export default function CamerasPage() {
         {/* Camera expand modal */}
         {selectedCam && (
           <Box
-            onClick={(e) => { if (e.target === e.currentTarget) setSelectedCam(null); }}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setSelectedCam(null);
+            }}
             sx={{
               position: "fixed",
               inset: 0,
@@ -443,8 +592,17 @@ export default function CamerasPage() {
                 }}
               >
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1.2 }}>
-                  <Box sx={{ width: 7, height: 7, borderRadius: "50%", background: ACCENT }} />
-                  <Typography sx={{ color: t.text, fontWeight: 600, fontSize: ".9rem" }}>
+                  <Box
+                    sx={{
+                      width: 7,
+                      height: 7,
+                      borderRadius: "50%",
+                      background: ACCENT,
+                    }}
+                  />
+                  <Typography
+                    sx={{ color: t.text, fontWeight: 600, fontSize: ".9rem" }}
+                  >
                     {selectedCam.name}
                   </Typography>
                 </Box>
@@ -464,7 +622,13 @@ export default function CamerasPage() {
                 <img
                   src={selectedCam.stream_url}
                   alt="Live stream"
-                  style={{ width: "100%", display: "block", maxHeight: "70vh", objectFit: "contain", background: "#000" }}
+                  style={{
+                    width: "100%",
+                    display: "block",
+                    maxHeight: "70vh",
+                    objectFit: "contain",
+                    background: "#000",
+                  }}
                 />
               ) : (
                 <Box
@@ -479,15 +643,23 @@ export default function CamerasPage() {
                   }}
                 >
                   <VideocamOffIcon sx={{ fontSize: 40, color: t.textMuted }} />
-                  <Typography sx={{ color: t.textMuted, fontSize: ".85rem" }}>No stream available</Typography>
+                  <Typography sx={{ color: t.textMuted, fontSize: ".85rem" }}>
+                    No stream available
+                  </Typography>
                 </Box>
               )}
               <Box sx={{ px: 2.5, py: 1.4, display: "flex", gap: 3 }}>
                 {selectedCam.zone_name && (
-                  <Typography sx={{ color: t.textMuted, fontSize: ".78rem" }}>{selectedCam.zone_name}</Typography>
+                  <Typography sx={{ color: t.textMuted, fontSize: ".78rem" }}>
+                    {selectedCam.zone_name}
+                  </Typography>
                 )}
-                <Typography sx={{ color: t.textMuted, fontSize: ".78rem" }}>{selectedCam.fps} fps</Typography>
-                <Typography sx={{ color: t.textMuted, fontSize: ".78rem" }}>{selectedCam.resolution}</Typography>
+                <Typography sx={{ color: t.textMuted, fontSize: ".78rem" }}>
+                  {selectedCam.fps} fps
+                </Typography>
+                <Typography sx={{ color: t.textMuted, fontSize: ".78rem" }}>
+                  {selectedCam.resolution}
+                </Typography>
               </Box>
             </Box>
           </Box>
@@ -496,11 +668,17 @@ export default function CamerasPage() {
         {/* Add Camera modal */}
         {addOpen && (
           <Box
-            onClick={(e) => { if (e.target === e.currentTarget) resetAndClose(); }}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) resetAndClose();
+            }}
             sx={{
-              position: "fixed", inset: 0, zIndex: 200,
+              position: "fixed",
+              inset: 0,
+              zIndex: 200,
               background: "rgba(0,0,0,0.75)",
-              display: "flex", alignItems: "center", justifyContent: "center",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
             <Box
@@ -518,16 +696,27 @@ export default function CamerasPage() {
               <Box
                 sx={{
                   flexShrink: 0,
-                  px: 2.5, py: 1.6, borderBottom: `1px solid ${t.border}`,
-                  display: "flex", alignItems: "center", justifyContent: "space-between",
+                  px: 2.5,
+                  py: 1.6,
+                  borderBottom: `1px solid ${t.border}`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
                 }}
               >
-                <Typography sx={{ color: t.text, fontWeight: 600, fontSize: ".95rem" }}>
+                <Typography
+                  sx={{ color: t.text, fontWeight: 600, fontSize: ".95rem" }}
+                >
                   {editingCameraId ? "Edit Camera" : "Add Camera"}
                 </Typography>
                 <Box
                   onClick={resetAndClose}
-                  sx={{ cursor: "pointer", color: t.textMuted, display: "flex", "&:hover": { color: t.text } }}
+                  sx={{
+                    cursor: "pointer",
+                    color: t.textMuted,
+                    display: "flex",
+                    "&:hover": { color: t.text },
+                  }}
                 >
                   <CloseIcon sx={{ fontSize: 20 }} />
                 </Box>
@@ -535,12 +724,20 @@ export default function CamerasPage() {
 
               <Box
                 sx={{
-                  p: 2.5, display: "flex", flexDirection: "column", gap: 2,
+                  p: 2.5,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 2,
                   overflowY: "auto",
                   "&::-webkit-scrollbar": { width: "8px" },
                   "&::-webkit-scrollbar-track": { background: "transparent" },
-                  "&::-webkit-scrollbar-thumb": { background: t.border, borderRadius: "4px" },
-                  "&::-webkit-scrollbar-thumb:hover": { background: t.textMuted },
+                  "&::-webkit-scrollbar-thumb": {
+                    background: t.border,
+                    borderRadius: "4px",
+                  },
+                  "&::-webkit-scrollbar-thumb:hover": {
+                    background: t.textMuted,
+                  },
                 }}
               >
                 <LabeledInput
@@ -562,24 +759,40 @@ export default function CamerasPage() {
                 standard protocols works the same way: a real CCTV camera,
                 an NVR channel, or a phone running an IP-camera app. */}
                 <Box>
-                  <Typography sx={{ color: t.textMuted, fontSize: ".75rem", mb: 0.8, fontWeight: 600 }}>
+                  <Typography
+                    sx={{
+                      color: t.textMuted,
+                      fontSize: ".75rem",
+                      mb: 0.8,
+                      fontWeight: 600,
+                    }}
+                  >
                     CONNECTION TYPE
                   </Typography>
                   <Box sx={{ display: "flex", gap: 1 }}>
-                    {([
-                      { v: "rtsp", label: "RTSP" },
-                      { v: "phone", label: "Phone camera" },
-                      { v: "http", label: "HTTP / MJPEG" },
-                      { v: "file", label: "Video file" },
-                    ] as const).map((opt) => {
+                    {(
+                      [
+                        { v: "rtsp", label: "RTSP" },
+                        { v: "phone", label: "Phone camera" },
+                        { v: "http", label: "HTTP / MJPEG" },
+                        { v: "file", label: "Video file" },
+                      ] as const
+                    ).map((opt) => {
                       const active = form.sourceType === opt.v;
                       return (
                         <Box
                           key={opt.v}
-                          onClick={() => setForm((f) => ({ ...f, sourceType: opt.v }))}
+                          onClick={() =>
+                            setForm((f) => ({ ...f, sourceType: opt.v }))
+                          }
                           sx={{
-                            flex: 1, textAlign: "center", py: 0.9, borderRadius: "8px",
-                            fontSize: ".78rem", fontWeight: 600, cursor: "pointer",
+                            flex: 1,
+                            textAlign: "center",
+                            py: 0.9,
+                            borderRadius: "8px",
+                            fontSize: ".78rem",
+                            fontWeight: 600,
+                            cursor: "pointer",
                             border: `1px solid ${active ? ACCENT : t.border}`,
                             background: active ? `${ACCENT}18` : "transparent",
                             color: active ? ACCENT : t.textMuted,
@@ -596,7 +809,7 @@ export default function CamerasPage() {
                   <>
                     <Box sx={{ display: "flex", gap: 1.5 }}>
                       <LabeledInput
-                        label="Camera IP or hostname"
+                        label="Camera IP"
                         required
                         placeholder="192.168.1.50"
                         value={form.host}
@@ -614,8 +827,11 @@ export default function CamerasPage() {
                     <Box
                       onClick={() => setShowAdvancedRtsp((s) => !s)}
                       sx={{
-                        display: "flex", alignItems: "center", gap: 0.6,
-                        cursor: "pointer", color: ACCENT,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.6,
+                        cursor: "pointer",
+                        color: ACCENT,
                         py: 0.5,
                         "&:hover": { opacity: 0.8 },
                       }}
@@ -624,14 +840,19 @@ export default function CamerasPage() {
                         sx={{
                           fontSize: 19,
                           transition: "transform .15s",
-                          transform: showAdvancedRtsp ? "rotate(180deg)" : "none",
+                          transform: showAdvancedRtsp
+                            ? "rotate(180deg)"
+                            : "none",
                         }}
                       />
-                      <Typography sx={{ fontSize: ".8rem", fontWeight: 700, color: ACCENT }}>
+                      <Typography
+                        sx={{
+                          fontSize: ".8rem",
+                          fontWeight: 700,
+                          color: ACCENT,
+                        }}
+                      >
                         Advanced settings
-                      </Typography>
-                      <Typography sx={{ fontSize: ".76rem", color: t.textMuted }}>
-                        — login, custom stream path
                       </Typography>
                     </Box>
 
@@ -641,18 +862,24 @@ export default function CamerasPage() {
                           <LabeledInput
                             label="Username"
                             value={form.username}
-                            onChange={(v) => setForm((f) => ({ ...f, username: v }))}
+                            placeholder="User Name"
+                            onChange={(v) =>
+                              setForm((f) => ({ ...f, username: v }))
+                            }
                           />
                           <LabeledInput
                             label="Password"
                             type="password"
+                            placeholder="Password"
                             value={form.password}
-                            onChange={(v) => setForm((f) => ({ ...f, password: v }))}
+                            onChange={(v) =>
+                              setForm((f) => ({ ...f, password: v }))
+                            }
                           />
                         </Box>
                         <LabeledInput
                           label="Stream path"
-                          placeholder="/stream1 — leave blank if unsure"
+                          placeholder="/stream1"
                           value={form.path}
                           onChange={(v) => setForm((f) => ({ ...f, path: v }))}
                         />
@@ -660,21 +887,31 @@ export default function CamerasPage() {
                     )}
 
                     <Typography sx={{ color: t.textMuted, fontSize: ".72rem" }}>
-                      Will connect to: rtsp://{form.username ? `${form.username}:••••@` : ""}
+                      Will connect to: rtsp://
+                      {form.username ? `${form.username}:••••@` : ""}
                       {form.host || "camera-ip"}:{form.port || "554"}
-                      {form.path ? (form.path.startsWith("/") ? form.path : `/${form.path}`) : ""}
+                      {form.path
+                        ? form.path.startsWith("/")
+                          ? form.path
+                          : `/${form.path}`
+                        : ""}
                     </Typography>
                   </>
                 )}
 
                 {form.sourceType === "phone" && (
                   <>
-                    <Typography sx={{ color: t.textMuted, fontSize: ".76rem", lineHeight: 1.5 }}>
-                      Install an IP-camera app on the phone (e.g. "IP Webcam"
-                      on Android, "EpocCam" on iOS), start it, and make sure
-                      the phone is on the same Wi-Fi network as this
-                      computer. The app will show an IP address — enter it
-                      below.
+                    <Typography
+                      sx={{
+                        color: t.textMuted,
+                        fontSize: ".76rem",
+                        lineHeight: 1.5,
+                      }}
+                    >
+                      Install an IP-camera app on the phone (e.g. "IP Webcam" on
+                      Android, "EpocCam" on iOS), start it, and make sure the
+                      phone is on the same Wi-Fi network as this computer. The
+                      app will show an IP address — enter it below.
                     </Typography>
                     <Box sx={{ display: "flex", gap: 1.5 }}>
                       <LabeledInput
@@ -688,7 +925,9 @@ export default function CamerasPage() {
                         label="Port"
                         placeholder="8080"
                         value={form.phonePort}
-                        onChange={(v) => setForm((f) => ({ ...f, phonePort: v }))}
+                        onChange={(v) =>
+                          setForm((f) => ({ ...f, phonePort: v }))
+                        }
                         sx={{ flex: "0 0 90px" }}
                       />
                     </Box>
@@ -699,8 +938,11 @@ export default function CamerasPage() {
                       onChange={(v) => setForm((f) => ({ ...f, phonePath: v }))}
                     />
                     <Typography sx={{ color: t.textMuted, fontSize: ".72rem" }}>
-                      Will connect to: http://{form.host || "phone-ip"}:{form.phonePort || "8080"}
-                      {form.phonePath.startsWith("/") ? form.phonePath : `/${form.phonePath || "video"}`}
+                      Will connect to: http://{form.host || "phone-ip"}:
+                      {form.phonePort || "8080"}
+                      {form.phonePath.startsWith("/")
+                        ? form.phonePath
+                        : `/${form.phonePath || "video"}`}
                     </Typography>
                   </>
                 )}
@@ -717,9 +959,19 @@ export default function CamerasPage() {
 
                 {form.sourceType === "file" && (
                   <>
-                    <Typography sx={{ color: t.textMuted, fontSize: ".72rem", fontWeight: 600, mb: 0.6 }}>
+                    <Typography
+                      sx={{
+                        color: t.textMuted,
+                        fontSize: ".72rem",
+                        fontWeight: 600,
+                        mb: 0.6,
+                      }}
+                    >
                       VIDEO FILE
-                      <Box component="span" sx={{ color: "#E74C3C" }}> *</Box>
+                      <Box component="span" sx={{ color: "#E74C3C" }}>
+                        {" "}
+                        *
+                      </Box>
                     </Typography>
                     <Box
                       component="input"
@@ -732,27 +984,46 @@ export default function CamerasPage() {
                     {form.fileName ? (
                       <Box
                         sx={{
-                          display: "flex", alignItems: "center", gap: 1.2,
-                          px: "12px", py: "9px", borderRadius: "8px",
-                          border: `1px solid ${t.border}`, background: t.bg,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1.2,
+                          px: "12px",
+                          py: "9px",
+                          borderRadius: "8px",
+                          border: `1px solid ${t.border}`,
+                          background: t.bg,
                         }}
                       >
-                        <CheckCircleIcon sx={{ fontSize: 17, color: GREEN, flexShrink: 0 }} />
+                        <CheckCircleIcon
+                          sx={{ fontSize: 17, color: GREEN, flexShrink: 0 }}
+                        />
                         <Typography
-                          sx={{ color: t.text, fontSize: ".85rem", flex: 1, minWidth: 0 }}
+                          sx={{
+                            color: t.text,
+                            fontSize: ".85rem",
+                            flex: 1,
+                            minWidth: 0,
+                          }}
                           noWrap
                         >
                           {/* the stored path is prefixed with a timestamp
                           purely to avoid collisions on the server — not
                           meaningful to the person, so only shown here for
                           submission, not for display */}
-                          {form.fileName.replace(/^.*[\\/]/, "").replace(/^\d{14}_/, "")}
+                          {form.fileName
+                            .replace(/^.*[\\/]/, "")
+                            .replace(/^\d{14}_/, "")}
                         </Typography>
                         <Box
-                          onClick={() => setForm((f) => ({ ...f, fileName: "" }))}
+                          onClick={() =>
+                            setForm((f) => ({ ...f, fileName: "" }))
+                          }
                           title="Remove and pick a different file"
                           sx={{
-                            display: "flex", cursor: "pointer", color: t.textMuted, flexShrink: 0,
+                            display: "flex",
+                            cursor: "pointer",
+                            color: t.textMuted,
+                            flexShrink: 0,
                             "&:hover": { color: "#E74C3C" },
                           }}
                         >
@@ -761,16 +1032,32 @@ export default function CamerasPage() {
                       </Box>
                     ) : (
                       <Box
-                        onClick={() => !uploadVideoMutation.isPending && fileInputRef.current?.click()}
+                        onClick={() =>
+                          !uploadVideoMutation.isPending &&
+                          fileInputRef.current?.click()
+                        }
                         sx={{
-                          display: "flex", alignItems: "center", justifyContent: "center", gap: 1,
-                          py: 1, borderRadius: "8px", fontSize: ".82rem", fontWeight: 600,
-                          border: `1px dashed ${t.border}`, color: t.textMuted,
-                          cursor: uploadVideoMutation.isPending ? "not-allowed" : "pointer",
-                          "&:hover": uploadVideoMutation.isPending ? {} : { borderColor: ACCENT, color: ACCENT },
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: 1,
+                          py: 1,
+                          borderRadius: "8px",
+                          fontSize: ".82rem",
+                          fontWeight: 600,
+                          border: `1px dashed ${t.border}`,
+                          color: t.textMuted,
+                          cursor: uploadVideoMutation.isPending
+                            ? "not-allowed"
+                            : "pointer",
+                          "&:hover": uploadVideoMutation.isPending
+                            ? {}
+                            : { borderColor: ACCENT, color: ACCENT },
                         }}
                       >
-                        {uploadVideoMutation.isPending ? "Uploading…" : "Browse for a video file to upload"}
+                        {uploadVideoMutation.isPending
+                          ? "Uploading…"
+                          : "Browse for a video file to upload"}
                       </Box>
                     )}
                     {uploadVideoMutation.isError && (
@@ -792,30 +1079,63 @@ export default function CamerasPage() {
                 )}
               </Box>
 
-              <Box sx={{ flexShrink: 0, px: 2.5, py: 1.6, borderTop: `1px solid ${t.border}`, display: "flex", justifyContent: "flex-end", gap: 1.2 }}>
+              <Box
+                sx={{
+                  flexShrink: 0,
+                  px: 2.5,
+                  py: 1.6,
+                  borderTop: `1px solid ${t.border}`,
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  gap: 1.2,
+                }}
+              >
                 <Box
                   onClick={resetAndClose}
                   sx={{
-                    px: 2, py: 0.9, borderRadius: "8px", fontSize: ".82rem", fontWeight: 600,
-                    color: t.textMuted, cursor: "pointer", border: `1px solid ${t.border}`,
+                    px: 2,
+                    py: 0.9,
+                    borderRadius: "8px",
+                    fontSize: ".82rem",
+                    fontWeight: 600,
+                    color: t.textMuted,
+                    cursor: "pointer",
+                    border: `1px solid ${t.border}`,
                   }}
                 >
                   Cancel
                 </Box>
                 <Box
-                  onClick={() => canSubmit && !activeMutation.isPending && handleAddCamera()}
+                  onClick={() =>
+                    canSubmit && !activeMutation.isPending && handleAddCamera()
+                  }
                   sx={{
-                    px: 2.4, py: 0.9, borderRadius: "8px", fontSize: ".82rem", fontWeight: 600,
+                    px: 2.4,
+                    py: 0.9,
+                    borderRadius: "8px",
+                    fontSize: ".82rem",
+                    fontWeight: 600,
                     color: canSubmit ? "#fff" : t.textMuted,
                     background: canSubmit ? ACCENT : t.border,
-                    cursor: canSubmit && !activeMutation.isPending ? "pointer" : "not-allowed",
-                    opacity: !canSubmit ? 0.5 : activeMutation.isPending ? 0.7 : 1,
+                    cursor:
+                      canSubmit && !activeMutation.isPending
+                        ? "pointer"
+                        : "not-allowed",
+                    opacity: !canSubmit
+                      ? 0.5
+                      : activeMutation.isPending
+                        ? 0.7
+                        : 1,
                     transition: "opacity .15s, background .15s, color .15s",
                   }}
                 >
                   {activeMutation.isPending
-                    ? (editingCameraId ? "Saving…" : "Connecting…")
-                    : (editingCameraId ? "Save Changes" : "Add Camera")}
+                    ? editingCameraId
+                      ? "Saving…"
+                      : "Connecting…"
+                    : editingCameraId
+                      ? "Save Changes"
+                      : "Add Camera"}
                 </Box>
               </Box>
             </Box>
@@ -825,11 +1145,17 @@ export default function CamerasPage() {
         {/* Delete camera confirmation */}
         {deleteTarget && (
           <Box
-            onClick={(e) => { if (e.target === e.currentTarget) setDeleteTarget(null); }}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setDeleteTarget(null);
+            }}
             sx={{
-              position: "fixed", inset: 0, zIndex: 210,
+              position: "fixed",
+              inset: 0,
+              zIndex: 210,
               background: "rgba(0,0,0,0.75)",
-              display: "flex", alignItems: "center", justifyContent: "center",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
             <Box
@@ -842,23 +1168,48 @@ export default function CamerasPage() {
                 p: 3,
               }}
             >
-              <Typography sx={{ color: t.text, fontWeight: 600, fontSize: ".95rem", mb: 1 }}>
+              <Typography
+                sx={{
+                  color: t.text,
+                  fontWeight: 600,
+                  fontSize: ".95rem",
+                  mb: 1,
+                }}
+              >
                 Delete camera?
               </Typography>
-              <Typography sx={{ color: t.textMuted, fontSize: ".82rem", lineHeight: 1.5, mb: 2.5 }}>
-                This will permanently remove "{deleteTarget.name}" and stop its stream. This can't be undone.
+              <Typography
+                sx={{
+                  color: t.textMuted,
+                  fontSize: ".82rem",
+                  lineHeight: 1.5,
+                  mb: 2.5,
+                }}
+              >
+                This will permanently remove "{deleteTarget.name}" and stop its
+                stream. This can't be undone.
               </Typography>
               {deleteCameraMutation.isError && (
-                <Typography sx={{ color: "#E74C3C", fontSize: ".78rem", mb: 1.5 }}>
+                <Typography
+                  sx={{ color: "#E74C3C", fontSize: ".78rem", mb: 1.5 }}
+                >
                   Couldn't delete the camera — try again.
                 </Typography>
               )}
-              <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1.2 }}>
+              <Box
+                sx={{ display: "flex", justifyContent: "flex-end", gap: 1.2 }}
+              >
                 <Box
                   onClick={() => setDeleteTarget(null)}
                   sx={{
-                    px: 2, py: 0.9, borderRadius: "8px", fontSize: ".82rem", fontWeight: 600,
-                    color: t.textMuted, cursor: "pointer", border: `1px solid ${t.border}`,
+                    px: 2,
+                    py: 0.9,
+                    borderRadius: "8px",
+                    fontSize: ".82rem",
+                    fontWeight: 600,
+                    color: t.textMuted,
+                    cursor: "pointer",
+                    border: `1px solid ${t.border}`,
                   }}
                 >
                   Cancel
@@ -871,9 +1222,16 @@ export default function CamerasPage() {
                     });
                   }}
                   sx={{
-                    px: 2.4, py: 0.9, borderRadius: "8px", fontSize: ".82rem", fontWeight: 600,
-                    color: "#fff", background: "#E74C3C",
-                    cursor: deleteCameraMutation.isPending ? "not-allowed" : "pointer",
+                    px: 2.4,
+                    py: 0.9,
+                    borderRadius: "8px",
+                    fontSize: ".82rem",
+                    fontWeight: 600,
+                    color: "#fff",
+                    background: "#E74C3C",
+                    cursor: deleteCameraMutation.isPending
+                      ? "not-allowed"
+                      : "pointer",
                     opacity: deleteCameraMutation.isPending ? 0.7 : 1,
                   }}
                 >
@@ -895,8 +1253,12 @@ export default function CamerasPage() {
               border: `1px solid ${t.border}`,
             }}
           >
-            <VideocamOffIcon sx={{ fontSize: 32, color: t.textMuted, mb: 1.5 }} />
-            <Typography sx={{ color: t.text, fontSize: ".92rem", fontWeight: 600 }}>
+            <VideocamOffIcon
+              sx={{ fontSize: 32, color: t.textMuted, mb: 1.5 }}
+            />
+            <Typography
+              sx={{ color: t.text, fontSize: ".92rem", fontWeight: 600 }}
+            >
               No cameras yet
             </Typography>
             <Typography sx={{ color: t.textMuted, fontSize: ".8rem", mt: 0.5 }}>
@@ -904,7 +1266,13 @@ export default function CamerasPage() {
             </Typography>
           </Box>
         ) : (
-          <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 2.5 }}>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "repeat(4, 1fr)",
+              gap: 2.5,
+            }}
+          >
             {cameras.map((cam) => {
               const isOnline = cam.status === "online";
               const hasStream = !!cam.stream_url;
@@ -938,13 +1306,22 @@ export default function CamerasPage() {
                           <img
                             src={cam.stream_url || ""}
                             alt={cam.name}
-                            style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+                            style={{
+                              position: "absolute",
+                              inset: 0,
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                            }}
                             onError={(e) => {
-                              (e.target as HTMLImageElement).style.display = "none";
+                              (e.target as HTMLImageElement).style.display =
+                                "none";
                             }}
                           />
                         ) : (
-                          <VideocamIcon sx={{ color: t.textMuted, fontSize: 28 }} />
+                          <VideocamIcon
+                            sx={{ color: t.textMuted, fontSize: 28 }}
+                          />
                         )}
                         <Box
                           sx={{
@@ -967,18 +1344,42 @@ export default function CamerasPage() {
                               borderRadius: "50%",
                               background: GREEN,
                               animation: "camBlink 1.4s ease-in-out infinite",
-                              "@keyframes camBlink": { "0%,100%": { opacity: 1 }, "50%": { opacity: 0.35 } },
+                              "@keyframes camBlink": {
+                                "0%,100%": { opacity: 1 },
+                                "50%": { opacity: 0.35 },
+                              },
                             }}
                           />
-                          <Typography sx={{ color: "#fff", fontSize: ".6rem", fontWeight: 700 }}>
+                          <Typography
+                            sx={{
+                              color: "#fff",
+                              fontSize: ".6rem",
+                              fontWeight: 700,
+                            }}
+                          >
                             {hasStream ? "LIVE" : "ONLINE"}
                           </Typography>
                         </Box>
                       </>
                     ) : (
-                      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
-                        <VideocamOffIcon sx={{ color: t.textMuted, fontSize: 24 }} />
-                        <Typography sx={{ color: t.textMuted, fontSize: ".68rem", fontWeight: 600 }}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          gap: 1,
+                        }}
+                      >
+                        <VideocamOffIcon
+                          sx={{ color: t.textMuted, fontSize: 24 }}
+                        />
+                        <Typography
+                          sx={{
+                            color: t.textMuted,
+                            fontSize: ".68rem",
+                            fontWeight: 600,
+                          }}
+                        >
                           Offline
                         </Typography>
                       </Box>
@@ -989,32 +1390,62 @@ export default function CamerasPage() {
                     <Box
                       className="cam-tile-overlay"
                       sx={{
-                        position: "absolute", inset: 0,
-                        opacity: 0, transition: "opacity .15s",
+                        position: "absolute",
+                        inset: 0,
+                        opacity: 0,
+                        transition: "opacity .15s",
                         background: "rgba(0,0,0,0.4)",
-                        display: "flex", alignItems: "center", justifyContent: "center",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
                       }}
                     >
-                      <Box sx={{ position: "absolute", top: 8, right: 8, display: "flex", gap: 0.6 }}>
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          top: 8,
+                          right: 8,
+                          display: "flex",
+                          gap: 0.6,
+                        }}
+                      >
                         <Box
-                          onClick={(e) => { e.stopPropagation(); handleEditClick(cam); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditClick(cam);
+                          }}
                           title="Edit camera"
                           sx={{
-                            width: 28, height: 28, borderRadius: "6px",
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            background: "rgba(0,0,0,0.6)", color: "#fff", cursor: "pointer",
+                            width: 28,
+                            height: 28,
+                            borderRadius: "6px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            background: "rgba(0,0,0,0.6)",
+                            color: "#fff",
+                            cursor: "pointer",
                             "&:hover": { background: ACCENT },
                           }}
                         >
                           <EditIcon sx={{ fontSize: 15 }} />
                         </Box>
                         <Box
-                          onClick={(e) => { e.stopPropagation(); setDeleteTarget(cam); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteTarget(cam);
+                          }}
                           title="Delete camera"
                           sx={{
-                            width: 28, height: 28, borderRadius: "6px",
-                            display: "flex", alignItems: "center", justifyContent: "center",
-                            background: "rgba(0,0,0,0.6)", color: "#fff", cursor: "pointer",
+                            width: 28,
+                            height: 28,
+                            borderRadius: "6px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            background: "rgba(0,0,0,0.6)",
+                            color: "#fff",
+                            cursor: "pointer",
                             "&:hover": { background: "#E74C3C" },
                           }}
                         >
@@ -1024,23 +1455,42 @@ export default function CamerasPage() {
 
                       {isOnline && (
                         <OpenInFullIcon
-                          onClick={(e) => { e.stopPropagation(); setSelectedCam(cam); }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedCam(cam);
+                          }}
                           titleAccess="View stream"
                           sx={{
-                            fontSize: 26, color: "#fff", cursor: "pointer",
-                            p: "6px", borderRadius: "6px",
+                            fontSize: 26,
+                            color: "#fff",
+                            cursor: "pointer",
+                            p: "6px",
+                            borderRadius: "6px",
                             transition: "transform .2s, background .2s",
-                            "&:hover": { background: ACCENT, transform: "scale(1.15)" },
+                            "&:hover": {
+                              background: ACCENT,
+                              transform: "scale(1.15)",
+                            },
                           }}
                         />
                       )}
                     </Box>
                   </Box>
                   <Box sx={{ p: "14px 16px 16px" }}>
-                    <Typography sx={{ color: t.text, fontSize: ".85rem", fontWeight: 600 }} noWrap>
+                    <Typography
+                      sx={{
+                        color: t.text,
+                        fontSize: ".85rem",
+                        fontWeight: 600,
+                      }}
+                      noWrap
+                    >
                       {cam.name}
                     </Typography>
-                    <Typography sx={{ color: t.textMuted, fontSize: ".74rem", mt: "2px" }} noWrap>
+                    <Typography
+                      sx={{ color: t.textMuted, fontSize: ".74rem", mt: "2px" }}
+                      noWrap
+                    >
                       {cam.zone_name || "No zone"} · {cam.resolution}
                       {cam.fps ? ` · ${cam.fps}fps` : ""}
                     </Typography>
@@ -1055,7 +1505,8 @@ export default function CamerasPage() {
                           textOverflow: "ellipsis",
                         }}
                       >
-                        Last detection {new Date(lastDetection).toLocaleTimeString()}
+                        Last detection{" "}
+                        {new Date(lastDetection).toLocaleTimeString()}
                       </Typography>
                     )}
                   </Box>
